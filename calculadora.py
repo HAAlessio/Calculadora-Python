@@ -26,12 +26,8 @@ class Calculadora:
 
         self.label_geral, self.label = self.cria_display_label()
 
-        self.digitos = {
-            7: (1, 1), 8: (1, 2), 9: (1, 3),
-            4: (2, 1), 5: (2, 2), 6: (2, 3),
-            1: (3, 1), 2: (3, 2), 3: (3, 3),
-            0: (4, 2), '.': (4, 3)
-        }
+        self.digitos = {7:(2, 1), 8:(2, 2), 9:(2, 3), 4:(3, 1), 5:(3, 2), 6:(3, 3), 1:(4, 1), 2:(4, 2), 3:(4, 3), 0:(5, 2), '.':(5, 3)}
+
         self.operacoes = {'/': '\u00F7', '*': '\u00D7', '-': '-', '+': '+'}
         self.botoes_frame = self.cria_botoes_frame()
 
@@ -50,14 +46,17 @@ class Calculadora:
             self.janela.bind(str(key), lambda event, digit=key: self.adiciona_expressao(digit))
 
         for key in self.operacoes:
-            self.janela.bind(key, lambda event, operator=key: self.junta_operador(operator))
+            self.janela.bind(key, lambda event, operador=key: self.junta_operador(operador))
 
     def cria_botoes_especiais(self):
         self.cria_botao_limpa()
         self.cria_botao_igual()
         self.cria_botao_potencia()
-        self.cria_botão_raiz()
-        self.cria_botão_negate()
+        self.cria_botao_raiz()
+        self.cria_botao_negate()
+        self.cria_botao_porcentagem()
+        self.cria_botao_fracao()
+        self.cria_botao_pi()
 
     def cria_display_label(self):
         label_geral = tk.Label(self.display_frame, text=self.expressao, anchor=tk.E, bg=CINZA_ESCURO,
@@ -81,23 +80,23 @@ class Calculadora:
 
     def cria_botoes_digitos(self):
         for digit, grid_value in self.digitos.items():
-            button = tk.Button(self.botoes_frame, text=str(digit), bg=CINZA_CLARO, fg=COR_DIGITO, font=FONTE_DIGITO,
+            botao = tk.Button(self.botoes_frame, text=str(digit), bg=CINZA_CLARO, fg=COR_DIGITO, font=FONTE_DIGITO,
                                borderwidth=0, command=lambda x=digit: self.adiciona_expressao(x))
-            button.grid(row=grid_value[0], column=grid_value[1], sticky=tk.NSEW)
+            botao.grid(row=grid_value[0], column=grid_value[1], sticky=tk.NSEW)
 
-    def junta_operador(self, operator):
-        self.expressao_atual += operator
+    def junta_operador(self, operador):
+        self.expressao_atual += operador
         self.expressao += self.expressao_atual
         self.expressao_atual = ''
         self.atualiza_label_geral()
         self.atualiza_label()
 
     def cria_botoes_operadores(self):
-        i = 0
-        for operator, symbol in self.operacoes.items():
-            button = tk.Button(self.botoes_frame, text=symbol, bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
-                               borderwidth=0, command=lambda x=operator: self.junta_operador(x))
-            button.grid(row=i, column=4, sticky=tk.NSEW)
+        i = 1
+        for operador, symbol in self.operacoes.items():
+            botao = tk.Button(self.botoes_frame, text=symbol, bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+                               borderwidth=0, command=lambda x=operador: self.junta_operador(x))
+            botao.grid(row=i, column=4, sticky=tk.NSEW)
             i += 1
 
     def limpa(self):
@@ -107,27 +106,27 @@ class Calculadora:
         self.atualiza_label_geral()
 
     def cria_botao_limpa(self):
-        button = tk.Button(self.botoes_frame, text='C', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+        botao = tk.Button(self.botoes_frame, text='C', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
                            borderwidth=0, command=self.limpa)
-        button.grid(row=0, column=1, sticky=tk.NSEW)
+        botao.grid(row=0, column=3, sticky=tk.NSEW, columnspan=2)
 
     def potencia(self):
         self.expressao_atual = str(eval(f'{self.expressao_atual}**2'))
         self.atualiza_label()
 
     def cria_botao_potencia(self):
-        button = tk.Button(self.botoes_frame, text='x\u00b2', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+        botao = tk.Button(self.botoes_frame, text='x\u00b2', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
                            borderwidth=0, command=self.potencia)
-        button.grid(row=0, column=2, sticky=tk.NSEW)
+        botao.grid(row=1, column=2, sticky=tk.NSEW)
 
     def raiz(self):
         self.expressao_atual = str(eval(f'{self.expressao_atual}**0.5'))
         self.atualiza_label()
 
-    def cria_botão_raiz(self):
-        button = tk.Button(self.botoes_frame, text='\u221ax', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+    def cria_botao_raiz(self):
+        botao = tk.Button(self.botoes_frame, text='\u221ax', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
                            borderwidth=0, command=self.raiz)
-        button.grid(row=0, column=3, sticky=tk.NSEW)
+        botao.grid(row=1, column=3, sticky=tk.NSEW)
 
     def avalia(self):
         self.expressao += self.expressao_atual
@@ -142,18 +141,47 @@ class Calculadora:
             self.atualiza_label()
 
     def cria_botao_igual(self):
-        button = tk.Button(self.botoes_frame, text='=', bg=LARANJA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+        botao = tk.Button(self.botoes_frame, text='=', bg=LARANJA, fg=COR_DIGITO, font=FONTE_DEFAULT,
                            borderwidth=0, command=self.avalia)
-        button.grid(row=4, column=4, columnspan=1, sticky=tk.NSEW)
+        botao.grid(row=5, column=4, columnspan=1, sticky=tk.NSEW)
 
     def negate(self):
-        self.expressao_atual = self.expressao_atual * -1
-        self.atualiza_label
+        if self.expressao_atual not in self.operacoes:
+            self.expressao_atual = str(float(self.expressao_atual) * -1)
+            self.atualiza_label()
 
-    def cria_botão_negate(self):
-        button = tk.Button(self.botoes_frame, text='+/-', bg=CINZA_CLARO, fg=COR_DIGITO, font=FONTE_DEFAULT,
+    def cria_botao_negate(self):
+        botao = tk.Button(self.botoes_frame, text='+/-', bg=CINZA_CLARO, fg=COR_DIGITO, font=FONTE_DEFAULT,
                            borderwidth=0, command=self.negate)
-        button.grid(row=4, column=1, columnspan=1, sticky=tk.NSEW)
+        botao.grid(row=5, column=1, columnspan=1, sticky=tk.NSEW)
+
+    def porcentagem(self):
+        self.expressao_atual = str(float(self.expressao_atual) / 100)
+        self.atualiza_label()
+
+    def cria_botao_porcentagem(self):
+        botao = tk.Button(self.botoes_frame, text='%', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+                           borderwidth=0, command=self.porcentagem)
+        botao.grid(row=0, column=2, columnspan=1, sticky=tk.NSEW)
+
+    def pi(self):
+        pi = 3.1415926535897932384626433832795
+        self.expressao_atual = "{:.2f}".format(pi)
+        self.atualiza_label()
+
+    def cria_botao_pi(self):
+        botao = tk.Button(self.botoes_frame, text='π', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+                           borderwidth=0, command=self.pi)
+        botao.grid(row=0, column=1, columnspan=1, sticky=tk.NSEW)
+
+    def fracao(self):
+        self.expressao_atual = str(1 / float(self.expressao_atual))
+        self.atualiza_label()
+
+    def cria_botao_fracao(self):
+        botao = tk.Button(self.botoes_frame, text='1/x', bg=CINZA, fg=COR_DIGITO, font=FONTE_DEFAULT,
+                           borderwidth=0, command=self.fracao)
+        botao.grid(row=1, column=1, columnspan=1, sticky=tk.NSEW)
 
     def cria_botoes_frame(self):
         frame = tk.Frame(self.janela)
@@ -162,8 +190,8 @@ class Calculadora:
 
     def atualiza_label_geral(self):
         expression = self.expressao
-        for operator, symbol in self.operacoes.items():
-            expression = expression.replace(operator, f' {symbol} ')
+        for operador, symbol in self.operacoes.items():
+            expression = expression.replace(operador, f' {symbol} ')
         self.label_geral.config(text=expression)
 
     def atualiza_label(self):
